@@ -11,9 +11,11 @@ load_dotenv()
 
 @app.post("/create_post_embedding" , status_code=201)
 async def create_embeddings(payload: dict = Body(...)):
-        post_id = payload.get("_id")
+        print(payload.get("content"))
+        print(payload.get("id"))
+        id = payload.get("id")
         content = payload.get("content")
-        print(payload)
+
         pc = Pinecone(api_key=os.getenv("pinecone_api_key"))
         
         index_name = "social-media"
@@ -30,12 +32,11 @@ async def create_embeddings(payload: dict = Body(...)):
         index = pc.Index(index_name)
         model = SentenceTransformer('BAAI/bge-small-en-v1.5')
 
-        text_data = [content]
-        embeddings = model.encode(text_data).tolist() # Convert to list for Pinecone
+        embeddings = model.encode([content]).tolist() # Convert to list for Pinecone
 
         vectors_to_upsert = [
         {
-            "id" : post_id,
+            "id" : id,
             "values" : embeddings[0],
             "metadata" : {
             "text"  : content,
@@ -45,4 +46,4 @@ async def create_embeddings(payload: dict = Body(...)):
 
         index.upsert(vectors=vectors_to_upsert)
 
-        return "Index Upserted"
+        return {"vector": embeddings[0]}
