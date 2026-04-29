@@ -9,17 +9,15 @@ from fastapi import Body
 app = FastAPI()
 load_dotenv()
 
+model = SentenceTransformer('BAAI/bge-small-en-v1.5') # Moved here to make the response faster, so the model is loaded everytime
+
 @app.post("/create_post_embedding" , status_code=201)
 async def create_embeddings(payload: dict = Body(...)):
-        print(payload.get("content"))
-        print(payload.get("id"))
         id = payload.get("id")
         content = payload.get("content")
 
         pc = Pinecone(api_key=os.getenv("pinecone_api_key"))
-        
         index_name = "social-media"
-
         # if index_name not in pc.list_indexes().names():
         #     pc.create_index(
         #     name=index_name,
@@ -28,9 +26,7 @@ async def create_embeddings(payload: dict = Body(...)):
         #     spec=ServerlessSpec(cloud="aws", region="us-east-1")
         # )
 
-
         index = pc.Index(index_name)
-        model = SentenceTransformer('BAAI/bge-small-en-v1.5')
 
         embeddings = model.encode([content]).tolist() # Convert to list for Pinecone
 
