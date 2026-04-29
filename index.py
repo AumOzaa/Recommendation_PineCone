@@ -11,9 +11,9 @@ load_dotenv()
 
 @app.post("/create_post_embedding" , status_code=201)
 async def create_embeddings(payload: dict = Body(...)):
-        post_id = payload.get("id")
+        post_id = payload.get("_id")
         content = payload.get("content")
-
+        print(payload)
         pc = Pinecone(api_key=os.getenv("pinecone_api_key"))
         
         index_name = "social-media"
